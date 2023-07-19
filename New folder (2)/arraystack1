@@ -1,0 +1,195 @@
+
+
+class AbstractCollection(object):
+    """An abstract collection implementation."""
+
+    # Constructor
+    def __init__(self, sourceCollection = None):
+        """Sets the initial state of self, which includes the
+        contents of sourceCollection, if it's present."""
+        self._size = 0
+        if sourceCollection:
+            for item in sourceCollection:
+                self.add(item)
+
+    # Accessor methods
+    def isEmpty(self):
+        """Returns True if len(self) == 0, or False otherwise."""
+        return len(self) == 0
+    
+    def __len__(self):
+        """Returns the number of items in self."""
+        return self._size
+
+    def __str__(self):
+        """Returns the string representation of self."""
+        return "[" + ", ".join(map(str, self)) + "]"
+
+    def __add__(self, other):
+        """Returns a new bag containing the contents
+        of self and other."""
+        result = type(self)(self)
+        for item in other:
+            result.add(item)
+        return result
+
+    def __eq__(self, other):
+        """Returns True if self equals other,
+        or False otherwise."""
+        if self is other: return True
+        if type(self) != type(other) or \
+           len(self) != len(other):
+            return False
+        otherIter = iter(other)
+        for item in self:
+            if item != next(otherIter):
+                return False
+        return True
+
+
+
+
+
+class AbstractStack(AbstractCollection):
+    """An abstract stack implementation."""
+
+    # Constructor
+    def __init__(self, sourceCollection = None):
+        """Sets the initial state of self, which includes the
+        contents of sourceCollection, if it's present."""
+        AbstractCollection.__init__(self, sourceCollection)
+
+    # Mutator methods
+    def add(self, item):
+        """Adds item to self."""
+        self.push(item)
+
+
+
+
+class Array(object):
+    """Represents an array."""
+
+    def __init__(self, capacity, fillValue = None):
+        """Capacity is the static size of the array.
+        fillValue is placed at each position."""
+        self._items = list()
+        for count in range(capacity):
+            self._items.append(fillValue)
+
+    def __len__(self):
+        """-> The capacity of the array."""
+        return len(self._items)
+
+    def __str__(self):
+        """-> The string representation of the array."""
+        return str(self._items)
+
+    def __iter__(self):
+        """Supports iteration over a view of an array."""
+        return iter(self._items)
+
+    def __getitem__(self, index):
+        """Subscript operator for access at index."""
+        return self._items[index]
+
+    def __setitem__(self, index, newItem):
+        """Subscript operator for replacement at index."""
+        self._items[index] = newItem
+
+
+
+
+
+class ArrayStack(AbstractStack):
+    """An array-based stack implementation."""
+
+    # Class variable
+    DEFAULT_CAPACITY = 10
+
+    # Constructor
+    def __init__(self, sourceCollection = None):
+        """Sets the initial state of self, which includes the
+        contents of sourceCollection, if it's present."""
+        self._items = Array(ArrayStack.DEFAULT_CAPACITY)
+        AbstractStack.__init__(self, sourceCollection)
+
+    # Accessor methods
+    def __iter__(self):
+        """Supports iteration over a view of self.
+        Visits items from bottom to top of stack."""
+        cursor = 0
+        while cursor < len(self):
+            yield self._items[cursor]
+            cursor += 1
+
+    def peek(self):
+        """Returns the item at the top of the stack.
+        Precondition: the stack is not empty.
+        Raises: KeyError if stack is empty."""
+        if self.isEmpty():
+            raise KeyError("The stack is empty")
+        return self._items[len(self) - 1]
+
+    # Mutator methods
+    def clear(self):
+        """Makes self become empty."""
+        self._size = 0
+        self._items = Array(ArrayStack.DEFAULT_CAPACITY)
+
+    def push(self, item):
+        """Inserts item at top of the stack."""
+        # Resize array here if necessary
+        self._items[len(self)] = item
+        self._size += 1
+
+    def pop(self):
+        """Removes and returns the item at the top of the stack.
+        Precondition: the stack is not empty.
+        Raises: KeyError if stack is empty.
+        Postcondition: the top item is removed from the stack."""
+        if self.isEmpty():
+            raise KeyError("The stack is empty")
+        oldItem = self._items[len(self) - 1]
+        self._size -= 1
+        # Resize the array here if necessary
+        return oldItem
+        
+
+# Checking whether the Array stack is working as expected or not.
+       
+# Create an instance of ArrayStack
+stack = ArrayStack()
+
+# Push some items onto the stack
+stack.push(10)
+stack.push(20)
+stack.push(30)
+
+# Print the stack
+print("Stack:", stack)  # Output: Stack: [10, 20, 30]
+
+# Get the top item of the stack
+top_item = stack.peek()
+print("Top item:", top_item)  # Output: Top item: 30
+
+# Pop an item from the stack
+popped_item = stack.pop()
+print("Popped item:", popped_item)  # Output: Popped item: 30
+
+# Print the stack after popping
+print("Stack:", stack)  # Output: Stack: [10, 20]
+
+# Check if the stack is empty
+print("Is stack empty?", stack.isEmpty())  # Output: Is stack empty? False
+
+# Clear the stack
+stack.clear()
+
+# Print the stack after clearing
+print("Stack:", stack)  # Output: Stack: []
+
+# Check if the stack is empty again
+print("Is stack empty?", stack.isEmpty())  # Output: Is stack empty? True
+
+
